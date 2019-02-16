@@ -1,23 +1,7 @@
-FROM jgoldfar/alpine-sbcl:3.9
+FROM alpine:edge
 
 LABEL maintainer="Jonathan Goldfarb <jgoldfar@my.fit.edu>"
 
 RUN apk add --no-cache \
-      git \
-      make \
-      texinfo \
-      autoconf \
-      automake \
-      python
-
-ENV MaximaPath=/opt/maxima
-
-RUN git clone https://git.code.sf.net/p/maxima/code ${MaximaPath} && \
-    cd ${MaximaPath} && \
-    ./bootstrap && \
-    ./configure --enable-sbcl --prefix=/usr/local --enable-quiet-build && \
-    make install && \
-    rm -rf ${MaximaPath}
-    
-RUN apk del automake texinfo autoconf python git &&\
-    rm -fr /var/cache/apk/*
+      octave \
+    && rm -fr /var/cache/apk/*
