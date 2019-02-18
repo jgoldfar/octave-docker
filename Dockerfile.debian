@@ -1,32 +1,67 @@
-FROM debian:stretch
+FROM debian:stretch-slim
 
 # Make sure we don't get notifications we can't answer during building.
 ENV DEBIAN_FRONTEND noninteractive
 
 LABEL maintainer="Jonathan Goldfarb <jgoldfar@my.fit.edu>"
 
-RUN apt-get -q -y update && \
-    apt-get upgrade -y -o Dpkg::Options::="--force-confdef" -o DPkg::Options::="--force-confold" && \
-    apt-get -q -y --no-install-recommends install \
-    curl \
-    make \
-    git \
-    vim \
-    ca-certificates \
-    texinfo \
-    python \
-    sbcl \
-    autoconf \
-    automake && \
-    apt-get clean && \
-    rm -rf /var/lib/apt/lists/*
+RUN apt-get -qq -y update && \
+    apt-get -qq -y --no-install-recommends install \
+      curl \
+      make \
+      ca-certificates \
+      autoconf \
+      automake \
+      texinfo \
+      gnuplot \ 
+      # hdf5
+      libhdf5-dev \
+      # Qt
+      qtbase5-dev \
+      icoutils \
+      # glpk
+      libglpk-dev \
+      bison \
+      # pcre3
+      libpcre2-dev \
+      # qruppate
+      libqrupdate-dev \
+      # qhull
+      libqhull-dev \
+      # readline
+      libreadline6-dev \
+      # fftw = fftw3 on homebrew
+      libfftw3-dev \
+      # gl2ps
+      libgl2ps-dev \
+      # suite-sparse
+      libsuitesparse-dev \
+      # openblas
+      libopenblas-dev \
+      # Ghostscript
+      ghostscript \ 
+      libgs-dev
 
-ENV MaximaPath=/opt/maxima
+ENV OctaveVersion=4.4.1
+ENV OctavePath=/opt/octave-${OctaveVersion}
 
-RUN mkdir -p ${MaximaPath} && \
-    git clone https://git.code.sf.net/p/maxima/code ${MaximaPath} && \
-    cd ${MaximaPath} && \
-    ./bootstrap && \
-    ./configure --enable-sbcl --prefix=/usr/local --enable-quiet-build && \
-    make install && \
-    rm -rf ${MaximaPath}
+RUN mkdir -p ${OctavePath} && \
+    curl -o /tmp/octave-${OctaveVersion}.tar.gz https://ftp.gnu.org/gnu/octave/octave-${OctaveVersion}.tar.xz && \
+    tar xzf /tmp/octave-${OctaveVersion}.tar.gz --directory ${OctavePath} --strip-components 1 && \
+    cd ${OctavePath} && \
+    ./configure && \
+    make -j3 install && \
+    ( make check || echo "Tests Failed." ) && \
+    rm -rf /tmp/octave-${OctaveVersion}.tar.gz && \
+    apt-get -qq -y remove \
+      curl \
+      autoconf \
+      automake \
+      texinfo \
+      qtbase5-dev \
+      icoutils \
+      bison && \
+    apt-get -qq -y autoremove && \
+    apt-get autoclean && \
+    rm -rf /var/lib/apt/lists/* /var/log/dpkg.log
+    

@@ -3,7 +3,7 @@ set -euo pipefail
 IFS=$'\n\t'
 
 # Debian + Octave
-DOCKER_REPO_BASE="octave-docker"
+DOCKER_REPO_BASE="octave"
 IMG_TAG=debian-latest
 
 docker build -f Dockerfile.debian -t ${DOCKER_USERNAME}/${DOCKER_REPO_BASE}:${IMG_TAG} .
