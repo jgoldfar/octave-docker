@@ -7,6 +7,7 @@ LABEL maintainer="Jonathan Goldfarb <jgoldfar@my.fit.edu>"
 
 RUN apt-get -qq -y update && \
     apt-get -qq -y --no-install-recommends install \
+      build-essential \
       curl \
       make \
       ca-certificates \
@@ -19,6 +20,7 @@ RUN apt-get -qq -y update && \
       icoutils \
       # glpk
       libglpk-dev \
+      flex \
       bison \
       flex \
       # pcre3
@@ -46,7 +48,7 @@ ENV OctavePath=/opt/octave-${OctaveVersion}
 
 RUN mkdir -p ${OctavePath} && \
     curl -o /tmp/octave-${OctaveVersion}.tar.gz https://ftp.gnu.org/gnu/octave/octave-${OctaveVersion}.tar.xz && \
-    tar xzf /tmp/octave-${OctaveVersion}.tar.gz --directory ${OctavePath} --strip-components 1 && \
+    tar xJf /tmp/octave-${OctaveVersion}.tar.gz --directory ${OctavePath} --strip-components 1 && \
     cd ${OctavePath} && \
     ./configure --without-qt && \
     make -j3 install && \
