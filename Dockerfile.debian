@@ -16,14 +16,13 @@ RUN apt-get -qq -y update && \
       gnuplot \ 
       # hdf5
       libhdf5-dev \
-      # Qt
-      qtbase5-dev \
       icoutils \
       # glpk
       libglpk-dev \
       bison \
+      flex \
       # pcre3
-      libpcre2-dev \
+      libpcre3-dev \
       # qruppate
       libqrupdate-dev \
       # qhull
@@ -49,7 +48,7 @@ RUN mkdir -p ${OctavePath} && \
     curl -o /tmp/octave-${OctaveVersion}.tar.gz https://ftp.gnu.org/gnu/octave/octave-${OctaveVersion}.tar.xz && \
     tar xzf /tmp/octave-${OctaveVersion}.tar.gz --directory ${OctavePath} --strip-components 1 && \
     cd ${OctavePath} && \
-    ./configure && \
+    ./configure --without-qt && \
     make -j3 install && \
     ( make check || echo "Tests Failed." ) && \
     rm -rf /tmp/octave-${OctaveVersion}.tar.gz && \
