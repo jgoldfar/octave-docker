@@ -9,10 +9,14 @@ RUN apt-get -qq -y update && \
     apt-get -qq -y --no-install-recommends install \
       build-essential \
       curl \
+      # For curl dependency in Octave build
+      libcurl4-openssl-dev \
       make \
       ca-certificates \
       autoconf \
       automake \
+      # This is necessary for autoreconf
+      libtool-bin \
       texinfo \
       gnuplot \ 
       # hdf5
@@ -20,7 +24,6 @@ RUN apt-get -qq -y update && \
       icoutils \
       # glpk
       libglpk-dev \
-      flex \
       bison \
       flex \
       # pcre3
@@ -41,27 +44,52 @@ RUN apt-get -qq -y update && \
       libopenblas-dev \
       # Ghostscript
       ghostscript \ 
-      libgs-dev
+      libgs-dev \
+      # GraphicsMagick++
+      libgraphicsmagick++1-dev \
+      # fltk
+      libfltk1.3-dev \
+      # OpenGL
+      libgl1-mesa-dev \
+      libglu1-mesa-dev \
+      freeglut3-dev \
+      # freetype for OpenGL
+      libfreetype6-dev \
+      # fontconfig for OpenGL
+      libfontconfig1-dev \
+      # rsvg-convert
+      librsvg2-bin \
+      patch \
+      vim
 
 ENV OctaveVersion=4.4.1
 ENV OctavePath=/opt/octave-${OctaveVersion}
 
+ADD getcwd-path-max.patch .
+
 RUN mkdir -p ${OctavePath} && \
-    curl -o /tmp/octave-${OctaveVersion}.tar.gz https://ftp.gnu.org/gnu/octave/octave-${OctaveVersion}.tar.xz && \
-    tar xJf /tmp/octave-${OctaveVersion}.tar.gz --directory ${OctavePath} --strip-components 1 && \
+    curl -o /tmp/octave-${OctaveVersion}.tar.xz https://ftp.gnu.org/gnu/octave/octave-${OctaveVersion}.tar.xz && \
+    tar xJf /tmp/octave-${OctaveVersion}.tar.xz --directory ${OctavePath} --strip-components 1 && \
+    patch -p0 < getcwd-path-max.patch && \
     cd ${OctavePath} && \
+    autoreconf -i -f && \
     ./configure --without-qt && \
     make -j3 install && \
     ( make check || echo "Tests Failed." ) && \
-    rm -rf /tmp/octave-${OctaveVersion}.tar.gz && \
+    rm -rf /tmp/octave-${OctaveVersion}.tar.xz && \
     apt-get -qq -y remove \
+      vim \
+      patch \
       curl \
       autoconf \
       automake \
       texinfo \
-      qtbase5-dev \
       icoutils \
-      bison && \
+      bison \
+      build-essential \
+      librsvg2-bin \
+      libtool-bin \
+      flex && \
     apt-get -qq -y autoremove && \
     apt-get autoclean && \
     rm -rf /var/lib/apt/lists/* /var/log/dpkg.log

@@ -1,5 +1,5 @@
---- coreutils-7.2.original/configure    2009-04-01 01:34:13.000000000 +1300
-+++ coreutils-7.2/configure 2015-05-25 12:50:39.616794241 +1200
+--- opt/octave-4.4.1/m4/getcwd-path-max.m4    2009-04-01 01:34:13.000000000 +1300
++++ opt/octave-4.4.1/m4/getcwd-path-max.m4 2015-05-25 12:50:39.616794241 +1200
 @@ -19177,6 +19177,7 @@
  #include <sys/stat.h>
  #include <sys/types.h>
