@@ -76,7 +76,6 @@ RUN mkdir -p ${OctavePath} && \
     ./configure --without-qt && \
     make -j3 install && \
     ( make check || echo "Tests Failed." ) && \
-    rm -rf /tmp/octave-${OctaveVersion}.tar.xz && \
     apt-get -qq -y remove \
       vim \
       patch \
@@ -92,5 +91,10 @@ RUN mkdir -p ${OctavePath} && \
       flex && \
     apt-get -qq -y autoremove && \
     apt-get autoclean && \
-    rm -rf /var/lib/apt/lists/* /var/log/dpkg.log
+    rm -rf \
+      /var/lib/apt/lists/* \
+      /var/log/dpkg.log \
+      /tmp/octave-${OctaveVersion}.tar.xz \
+      getcwd-path-max.patch 
+      ${OctavePath} && \
     
