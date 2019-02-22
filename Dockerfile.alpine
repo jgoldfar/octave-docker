@@ -1,7 +1,3 @@
 FROM alpine:edge
 
 LABEL maintainer="Jonathan Goldfarb <jgoldfar@my.fit.edu>"
-
-RUN apk add --no-cache \
-      octave \
-    && rm -fr /var/cache/apk/*

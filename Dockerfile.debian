@@ -95,6 +95,6 @@ RUN mkdir -p ${OctavePath} && \
       /var/lib/apt/lists/* \
       /var/log/dpkg.log \
       /tmp/octave-${OctaveVersion}.tar.xz \
-      getcwd-path-max.patch 
-      ${OctavePath} && \
+      getcwd-path-max.patch \
+      ${OctavePath}
     
