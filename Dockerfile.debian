@@ -1,4 +1,4 @@
-FROM debian:stretch-slim
+FROM debian:stretch-slim as builder
 
 # Make sure we don't get notifications we can't answer during building.
 ENV DEBIAN_FRONTEND noninteractive
@@ -60,7 +60,7 @@ RUN apt-get -qq -y update && \
       # rsvg-convert
       librsvg2-bin \
       patch \
-      vim
+      gperf
 
 ENV OctaveVersion=4.4.1
 ENV OctavePath=/opt/octave-${OctaveVersion}
@@ -97,4 +97,9 @@ RUN mkdir -p ${OctavePath} && \
       /tmp/octave-${OctaveVersion}.tar.xz \
       getcwd-path-max.patch \
       ${OctavePath}
-    
+
+FROM debian:stretch-slim as final
+RUN apt-get -qq -y update && \
+    apt-get -qq -y --no-install-recommends install \
+      texinfo \
+      gnuplot
