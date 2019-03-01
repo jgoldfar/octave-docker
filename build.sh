@@ -3,11 +3,24 @@ set -euo pipefail
 IFS=$'\n\t'
 
 # Debian + Octave
-DOCKER_REPO_BASE="octave"
-for IMG_TAG in debian alpine ; do
-docker build -f Dockerfile.${IMG_TAG} -t ${DOCKER_USERNAME}/${DOCKER_REPO_BASE}:${IMG_TAG} .
+DOCKER_REPO_BASE=octave
+IMG_TAG=latest
+IMG_TARGET=builder
+docker build -f Dockerfile.debian --target ${IMG_TARGET} -t ${DOCKER_USERNAME}/${DOCKER_REPO_BASE}:${IMG_TAG} .
+#docker push ${DOCKER_USERNAME}/${DOCKER_REPO_BASE}:${IMG_TAG}
+
+# Build main entrypoint
+IMG_TAG=latest
+IMG_TARGET=octave
+docker build -f Dockerfile.debian --target ${IMG_TARGET} -t ${DOCKER_USERNAME}/${DOCKER_REPO_BASE}:${IMG_TAG} .
 docker push ${DOCKER_USERNAME}/${DOCKER_REPO_BASE}:${IMG_TAG}
-done
+
+# Add alternative entrypoint for mkoctfile
+IMG_TAG=latest
+IMG_TARGET=mkoctfile
+docker build -f Dockerfile.debian --target ${IMG_TARGET} -t ${DOCKER_USERNAME}/${DOCKER_REPO_BASE}:${IMG_TAG}-${IMG_TARGET} .
+docker push ${DOCKER_USERNAME}/${DOCKER_REPO_BASE}:${IMG_TAG}-${IMG_TARGET}
+#TODO: Add PDEPE1 build
 
 # Alpine + Octave (Source)
 # Use Docker Hub's infrastructure

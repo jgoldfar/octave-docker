@@ -91,15 +91,112 @@ RUN mkdir -p ${OctavePath} && \
       flex && \
     apt-get -qq -y autoremove && \
     apt-get autoclean && \
+    cd / && \
     rm -rf \
       /var/lib/apt/lists/* \
       /var/log/dpkg.log \
       /tmp/octave-${OctaveVersion}.tar.xz \
       getcwd-path-max.patch \
-      ${OctavePath}
+      ${OctavePath} && \
+    # Smoke test
+    octave --version
 
-FROM debian:stretch-slim as final
+# End builder image
+
+## 
+##
+##
+
+# Final image contains just Octave
+FROM debian:stretch-slim as octave
 RUN apt-get -qq -y update && \
     apt-get -qq -y --no-install-recommends install \
       texinfo \
       gnuplot
+
+# Set ENV the same as above
+ENV OctaveVersion=4.4.1
+
+# Copy over libs and share files
+COPY --from=builder /usr/local/lib/octave /usr/local/lib/octave
+COPY --from=builder /usr/local/share/octave /usr/local/share/octave
+
+# Copy over Octave binaries (includes mkoctfile)
+COPY --from=builder /usr/local/bin/*oct* /usr/local/bin/
+
+# Copy over Octave docstrings. Note that some paths contain 
+# version-specific information.
+COPY --from=builder /usr/local/share/octave/${OctaveVersion}/etc/built-in-docstrings /usr/local/share/octave/${OctaveVersion}/etc/
+
+# Copy over Octave include files
+COPY --from=builder /usr/local/include/octave-${OctaveVersion} /usr/local/include/octave-${OctaveVersion}
+
+# Copy over necessary fonts
+COPY --from=builder /usr/local/share/octave/${OctaveVersion}/fonts/* /usr/local/share/octave/${OctaveVersion}/fonts/
+
+# Copy over Octave STDLIB (m-files)
+COPY --from=builder /usr/local/share/octave/${OctaveVersion}/m /usr/local/share/octave/${OctaveVersion}/m
+
+# Copy over Octave site packages
+COPY --from=builder /usr/local/share/octave/site/* /usr/local/share/octave/site/
+
+# Copy over Manfiles
+COPY --from=builder /usr/local/share/man/man1/*oct* /usr/local/share/man/man1/
+
+# Copy all other dylibs needed to run octave
+COPY --from=builder /usr/lib/libopenblas.so.* /usr/lib/
+COPY --from=builder /usr/lib/liblapack.so.* /usr/lib/
+COPY --from=builder /usr/lib/libblas.so.* /usr/lib/
+COPY --from=builder /usr/lib/libGraphicsMagick++-Q16.so.* /usr/lib/
+COPY --from=builder /usr/lib/libGraphicsMagick-Q16.so.* /usr/lib/
+
+COPY --from=builder /usr/lib/x86_64-linux-gnu/libgomp.so.* /usr/lib/x86_64-linux-gnu/
+COPY --from=builder /usr/lib/x86_64-linux-gnu/libhdf5_serial.so.* /usr/lib/x86_64-linux-gnu/
+COPY --from=builder /usr/lib/x86_64-linux-gnu/libfftw3f_threads.so.* /usr/lib/x86_64-linux-gnu/
+COPY --from=builder /usr/lib/x86_64-linux-gnu/libfftw3_threads.so.* /usr/lib/x86_64-linux-gnu/
+COPY --from=builder /usr/lib/x86_64-linux-gnu/libfftw3f.so.* /usr/lib/x86_64-linux-gnu/
+COPY --from=builder /usr/lib/x86_64-linux-gnu/libfftw3.so.* /usr/lib/x86_64-linux-gnu/
+COPY --from=builder /usr/lib/x86_64-linux-gnu/libGLU.so.* /usr/lib/x86_64-linux-gnu/
+COPY --from=builder /usr/lib/x86_64-linux-gnu/libgl2ps.so.* /usr/lib/x86_64-linux-gnu/
+COPY --from=builder /usr/lib/x86_64-linux-gnu/libcurl.so.* /usr/lib/x86_64-linux-gnu/
+COPY --from=builder /usr/lib/x86_64-linux-gnu/libcholmod.so.* /usr/lib/x86_64-linux-gnu/
+COPY --from=builder /usr/lib/x86_64-linux-gnu/libumfpack.so.* /usr/lib/x86_64-linux-gnu/
+COPY --from=builder /usr/lib/x86_64-linux-gnu/libamd.so.* /usr/lib/x86_64-linux-gnu/
+COPY --from=builder /usr/lib/x86_64-linux-gnu/libcamd.so.* /usr/lib/x86_64-linux-gnu/
+COPY --from=builder /usr/lib/x86_64-linux-gnu/libcolamd.so.* /usr/lib/x86_64-linux-gnu/
+COPY --from=builder /usr/lib/x86_64-linux-gnu/libccolamd.so.* /usr/lib/x86_64-linux-gnu/
+COPY --from=builder /usr/lib/x86_64-linux-gnu/libcxsparse.so.* /usr/lib/x86_64-linux-gnu/
+COPY --from=builder /usr/lib/x86_64-linux-gnu/libsuitesparseconfig.so.* /usr/lib/x86_64-linux-gnu/
+COPY --from=builder /usr/lib/x86_64-linux-gnu/libqrupdate.so.* /usr/lib/x86_64-linux-gnu/
+COPY --from=builder /usr/lib/x86_64-linux-gnu/libqhull.so.* /usr/lib/x86_64-linux-gnu/
+COPY --from=builder /usr/lib/x86_64-linux-gnu/libreadline.so /usr/lib/x86_64-linux-gnu/
+COPY --from=builder /lib/x86_64-linux-gnu/libreadline.so.* /lib/x86_64-linux-gnu/
+COPY --from=builder /usr/lib/x86_64-linux-gnu/libgfortran.so.* /usr/lib/x86_64-linux-gnu/
+COPY --from=builder /usr/lib/x86_64-linux-gnu/libquadmath.so.* /usr/lib/x86_64-linux-gnu/
+COPY --from=builder /usr/lib/x86_64-linux-gnu/libsz.so.* /usr/lib/x86_64-linux-gnu/
+COPY --from=builder /usr/lib/x86_64-linux-gnu/libwebpmux.so.* /usr/lib/x86_64-linux-gnu/
+COPY --from=builder /usr/lib/x86_64-linux-gnu/liblcms2.so.* /usr/lib/x86_64-linux-gnu/
+COPY --from=builder /usr/lib/x86_64-linux-gnu/libwmflite-0.2.so.* /usr/lib/x86_64-linux-gnu/
+COPY --from=builder /usr/lib/x86_64-linux-gnu/libnghttp2.so.* /usr/lib/x86_64-linux-gnu/
+COPY --from=builder /usr/lib/x86_64-linux-gnu/libidn2.so.* /usr/lib/x86_64-linux-gnu/
+COPY --from=builder /usr/lib/x86_64-linux-gnu/librtmp.so.* /usr/lib/x86_64-linux-gnu/
+COPY --from=builder /usr/lib/x86_64-linux-gnu/libssh2.so.* /usr/lib/x86_64-linux-gnu/
+COPY --from=builder /usr/lib/x86_64-linux-gnu/libpsl.so.* /usr/lib/x86_64-linux-gnu/
+COPY --from=builder /usr/lib/x86_64-linux-gnu/liblber-2.4.so.* /usr/lib/x86_64-linux-gnu/
+COPY --from=builder /usr/lib/x86_64-linux-gnu/libldap_r-2.4.so.* /usr/lib/x86_64-linux-gnu/
+COPY --from=builder /usr/lib/x86_64-linux-gnu/libmetis.so.* /usr/lib/x86_64-linux-gnu/
+COPY --from=builder /usr/lib/x86_64-linux-gnu/libaec.so.* /usr/lib/x86_64-linux-gnu/
+COPY --from=builder /usr/lib/x86_64-linux-gnu/libunistring.so.* /usr/lib/x86_64-linux-gnu/
+COPY --from=builder /usr/lib/x86_64-linux-gnu/libsasl2.so.* /usr/lib/x86_64-linux-gnu/
+
+# Smoke test
+RUN octave --version && \
+    octave --eval "disp(eye(2) \ [1, 10]');" && \
+    octave --eval "hf = figure(); x=linspace(0,1,30); plot(x, erf(x)); print(hf, 'plot.eps', '-deps');"
+
+# Set entrypoint (so this image can be used as an executable.)
+ENTRYPOINT ["/usr/local/bin/octave"]
+
+## Separate entrypoint to easily access mkoctfile JIC
+FROM octave as mkoctfile
+ENTRYPOINT ["mkoctfile"]
