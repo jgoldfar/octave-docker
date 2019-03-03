@@ -28,5 +28,3 @@ Why should I use this container?
 ## Container Descriptions
 
 * `debian` contains an Octave installation on top of Debian Stretch
-
-* `alpine` contains an Octave installation on top of Alpine Linux Edge
