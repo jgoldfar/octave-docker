@@ -7,8 +7,8 @@ DOCKER_REPO_BASE=octave
 IMG_TAG=latest
 
 # First, the builder (which is not pushed to docker hub)
-IMG_TARGET=builder
-docker build -f Dockerfile.debian --target ${IMG_TARGET} -t ${DOCKER_USERNAME}/${DOCKER_REPO_BASE}:${IMG_TAG} .
+#IMG_TARGET=builder
+# docker build -f Dockerfile.debian --target ${IMG_TARGET} -t ${DOCKER_USERNAME}/${DOCKER_REPO_BASE}:${IMG_TAG} .
 
 
 # Build main entrypoint
@@ -21,6 +21,12 @@ docker push ${DOCKER_USERNAME}/${DOCKER_REPO_BASE}:${IMG_TAG}
 IMG_TARGET=mkoctfile
 docker build -f Dockerfile.debian --target ${IMG_TARGET} -t ${DOCKER_USERNAME}/${DOCKER_REPO_BASE}:${IMG_TAG}-${IMG_TARGET} .
 docker push ${DOCKER_USERNAME}/${DOCKER_REPO_BASE}:${IMG_TAG}-${IMG_TARGET}
+
+IMG_TAG=gui
+#docker build -f Dockerfile.${IMG_TAG} --target=builder -t ${DOCKER_USERNAME}/${DOCKER_REPO_BASE}:${IMG_TAG} .
+
+docker build -f Dockerfile.${IMG_TAG} -t ${DOCKER_USERNAME}/${DOCKER_REPO_BASE}:${IMG_TAG} .
+docker push ${DOCKER_USERNAME}/${DOCKER_REPO_BASE}:${IMG_TAG}
 
 # Alpine + Octave (Source)
 # Use Docker Hub's infrastructure
