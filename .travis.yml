@@ -2,10 +2,10 @@ language: minimal
 
 services:
   - docker
-
-jobs:
-  include:
-    - stage: build docker image
-      script:
-        - echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin
-        - ./build.sh
+env:
+  - TARGET=latest
+  - TARGET=gui
+  
+script:
+  - echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin
+  - make ${TARGET}

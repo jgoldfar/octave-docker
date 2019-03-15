@@ -1,15 +1,17 @@
 FROM debian:stretch-slim as builder
 
 # Make sure we don't get notifications we can't answer during building.
-ENV DEBIAN_FRONTEND noninteractive
+ENV DEBIAN_FRONTEND=noninteractive \
+    OctavePath=/opt/octave-${OctaveVersion} \
+    OctaveVersion=4.4.1
 
 LABEL maintainer="Jonathan Goldfarb <jgoldfar@my.fit.edu>"
 
 RUN apt-get -qq -y update && \
-    apt-get -qq -y --no-install-recommends install \
+    apt-get -q -y --no-install-recommends install \
       build-essential \
+      libgfortran-6-dev \
       curl \
-      # For curl dependency in Octave build
       libcurl4-openssl-dev \
       make \
       ca-certificates \
@@ -19,90 +21,54 @@ RUN apt-get -qq -y update && \
       libtool-bin \
       texinfo \
       gnuplot \ 
-      # hdf5
-      libhdf5-dev \
       icoutils \
-      # glpk
-      libglpk-dev \
       bison \
       flex \
-      # pcre3
+      patch \
+      gperf \
+      zip \
+      ghostscript \
+      # hdf5
+      libhdf5-serial-dev \
       libpcre3-dev \
-      # qruppate
+      libreadline-dev \
+      libglpk-dev \
       libqrupdate-dev \
-      # qhull
       libqhull-dev \
-      # readline
-      libreadline6-dev \
-      # fftw = fftw3 on homebrew
       libfftw3-dev \
-      # gl2ps
       libgl2ps-dev \
-      # suite-sparse
+      libarpack2-dev \
       libsuitesparse-dev \
-      # openblas
       libopenblas-dev \
-      # Ghostscript
-      ghostscript \ 
+      # Graphics
       libgs-dev \
-      # GraphicsMagick++
+      libgraphicsmagick++ \
       libgraphicsmagick++1-dev \
-      # fltk
       libfltk1.3-dev \
-      # OpenGL
       libgl1-mesa-dev \
       libglu1-mesa-dev \
       freeglut3-dev \
-      # freetype for OpenGL
       libfreetype6-dev \
-      # fontconfig for OpenGL
       libfontconfig1-dev \
-      # rsvg-convert
       librsvg2-bin \
-      patch \
-      gperf \
-      zip
+      libosmesa6-dev \
+      # Sundials
+      libsundials-serial-dev
 
-ENV OctaveVersion=4.4.1
-ENV OctavePath=/opt/octave-${OctaveVersion}
-
-ADD getcwd-path-max.patch .
-
-# TODO: figure out how to re-add make check
-# ( make check || echo "Tests Failed." ) && \
+ADD getcwd-path-max.patch /tmp/
 
 RUN mkdir -p ${OctavePath} && \
     curl -o /tmp/octave-${OctaveVersion}.tar.xz https://ftp.gnu.org/gnu/octave/octave-${OctaveVersion}.tar.xz && \
-    tar xJf /tmp/octave-${OctaveVersion}.tar.xz --directory ${OctavePath} --strip-components 1 && \
-    patch -p0 < getcwd-path-max.patch && \
-    cd ${OctavePath} && \
+    tar xJf /tmp/octave-${OctaveVersion}.tar.xz --directory ${OctavePath} --strip-components 1
+
+#TODO: Re-add make check step
+# ( make check || echo "Tests Failed." )
+
+RUN cd ${OctavePath} && \
+    patch -p2 < /tmp/getcwd-path-max.patch && \
     autoreconf -i -f && \
     ./configure --without-qt --disable-docs && \
-    make -j3 install && \
-    apt-get -qq -y remove \
-      vim \
-      patch \
-      curl \
-      autoconf \
-      automake \
-      texinfo \
-      icoutils \
-      bison \
-      build-essential \
-      librsvg2-bin \
-      libtool-bin \
-      flex && \
-    apt-get -qq -y autoremove && \
-    apt-get autoclean && \
-    cd / && \
-    rm -rf \
-      /var/lib/apt/lists/* \
-      /var/log/dpkg.log \
-      /tmp/octave-${OctaveVersion}.tar.xz \
-      getcwd-path-max.patch \
-      ${OctavePath} && \
-    # Smoke test
-    octave --version
+    make -j3 install
 
 # End builder image
 
@@ -110,8 +76,7 @@ RUN mkdir -p ${OctavePath} && \
 ##
 ##
 
-# Final image contains just Octave
-FROM debian:stretch-slim as octave
+FROM debian:stretch-slim as latest
 RUN apt-get -qq -y update && \
     apt-get -qq -y --no-install-recommends install \
       texinfo \
@@ -152,15 +117,15 @@ RUN apt-get -qq -y update && \
       libosmesa6 \
       # CLI
       libreadline7 \
-      # QT
-      libqscintilla2-12v5 \
-      libqtcore4 \
-      libqtgui4 \
-      libqt4-network \
-      libqtwebkit4 \
+      # Sundials
+      libsundials-serial \
+      libklu1 \
+      libbtf1 \
+      # For Octave installation
+      equivs \
       # Others
-      libgraphicsmagick++1-dev \
-      libgraphicsmagick1-dev \
+      libgraphicsmagick++-q16-12 \
+      libgraphicsmagick-q16-3 \
       liblcms2-2 \
       libnghttp2-14 \
       libidn2-0 \
@@ -175,6 +140,7 @@ RUN apt-get -qq -y update && \
       libwebpmux2 \
       libwmf0.2-7 \
       libaec0
+ 
 
 # Set ENV the same as above
 ENV OctaveVersion=4.4.1
@@ -202,11 +168,30 @@ COPY --from=builder /usr/local/share/octave/${OctaveVersion}/m /usr/local/share/
 # Copy over Octave site packages
 COPY --from=builder /usr/local/share/octave/site/* /usr/local/share/octave/site/
 
+# NOTE: Manfiles and docs not copied because they weren't built!
 
-# Smoke test
-RUN octave --version && \
+# Install octave package as equiv package
+COPY octave-local.tpl /tmp/octave-equivs/octave-local.tpl
+
+RUN cd /tmp/octave-equivs && \
+    equivs-control octave-local && \
+    sed 's/__VER__/${OctaveVersion}/' octave-local.tpl > octave-local && \
+    cat octave-local && \
+    equivs-build octave-local && \
+    dpkg -i octave-local_*.deb
+
+RUN apt-get -qq -y remove \
+      equivs && \
+    apt-get -qq -y autoremove && \
+    apt-get autoclean && \
+    cd / && \
+    rm -rf \
+      /var/lib/apt/lists/* \
+      /var/log/dpkg.log && \
+    octave --version && \
     octave --eval "disp(eye(2) \ [1, 10]');" && \
     octave --eval "hf = figure(); x=linspace(0,1,30); plot(x, erf(x)); print(hf, 'plot.eps', '-deps');"
+    
 
 # Set entrypoint (so this image can be used as an executable.)
 ENTRYPOINT ["/usr/local/bin/octave"]
