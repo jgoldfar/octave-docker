@@ -60,12 +60,16 @@ RUN apt-get -qq -y update && \
       # rsvg-convert
       librsvg2-bin \
       patch \
-      gperf
+      gperf \
+      zip
 
 ENV OctaveVersion=4.4.1
 ENV OctavePath=/opt/octave-${OctaveVersion}
 
 ADD getcwd-path-max.patch .
+
+# TODO: figure out how to re-add make check
+# ( make check || echo "Tests Failed." ) && \
 
 RUN mkdir -p ${OctavePath} && \
     curl -o /tmp/octave-${OctaveVersion}.tar.xz https://ftp.gnu.org/gnu/octave/octave-${OctaveVersion}.tar.xz && \
@@ -73,9 +77,8 @@ RUN mkdir -p ${OctavePath} && \
     patch -p0 < getcwd-path-max.patch && \
     cd ${OctavePath} && \
     autoreconf -i -f && \
-    ./configure --without-qt && \
+    ./configure --without-qt --disable-docs && \
     make -j3 install && \
-    ( make check || echo "Tests Failed." ) && \
     apt-get -qq -y remove \
       vim \
       patch \
@@ -112,7 +115,49 @@ FROM debian:stretch-slim as octave
 RUN apt-get -qq -y update && \
     apt-get -qq -y --no-install-recommends install \
       texinfo \
-      gnuplot
+      ghostscript \
+      gnuplot \
+      # Build-essential related
+      libgomp1 \
+      libcurl4-openssl-dev \
+      libgfortran-6-dev \
+      libhdf5-serial-dev \
+      libquadmath0 \
+      libqhull7 \
+      # Linear Algebra
+      libsuitesparseconfig4 \
+      # AMD
+      libamd2 \
+      libcamd2 \
+      libcolamd2 \
+      libccolamd2 \
+      # Other LA
+      libumfpack5 \
+      libqrupdate1 \
+      libcholmod3 \
+      libarpack2 \
+      libopenblas-base \
+      libcxsparse3 \
+      # FFTW
+      libfftw3-double3 \
+      libfftw3-single3 \
+      # Graphical Output
+      libfltk-gl1.3 \
+      libfltk1.3 \
+      libfontconfig1 \
+      libfreetype6 \
+      libgl2ps1 \
+      libgl1-mesa-glx \
+      libglu1-mesa \
+      libosmesa6 \
+      # CLI
+      libreadline7 \
+      # QT
+      libqscintilla2-12v5 \
+      libqtcore4 \
+      libqtgui4 \
+      libqt4-network \
+      libqtwebkit4
 
 # Set ENV the same as above
 ENV OctaveVersion=4.4.1
@@ -140,38 +185,8 @@ COPY --from=builder /usr/local/share/octave/${OctaveVersion}/m /usr/local/share/
 # Copy over Octave site packages
 COPY --from=builder /usr/local/share/octave/site/* /usr/local/share/octave/site/
 
-# Copy over Manfiles
-COPY --from=builder /usr/local/share/man/man1/*oct* /usr/local/share/man/man1/
-
 # Copy all other dylibs needed to run octave, starting with those
 # linked into liboctave or directly into the octave executable
-COPY --from=builder /usr/lib/libopenblas.so.0 /usr/lib/
-COPY --from=builder /usr/lib/liblapack.so.3 /usr/lib/
-COPY --from=builder /usr/lib/libblas.so.3 /usr/lib/
-
-#
-COPY --from=builder /usr/lib/x86_64-linux-gnu/libgomp.so.1 /usr/lib/x86_64-linux-gnu/
-COPY --from=builder /usr/lib/x86_64-linux-gnu/libhdf5_serial.so.* /usr/lib/x86_64-linux-gnu/
-COPY --from=builder /usr/lib/x86_64-linux-gnu/libfftw3f_threads.so.3 /usr/lib/x86_64-linux-gnu/
-COPY --from=builder /usr/lib/x86_64-linux-gnu/libfftw3_threads.so.3 /usr/lib/x86_64-linux-gnu/
-COPY --from=builder /usr/lib/x86_64-linux-gnu/libfftw3f.so.3 /usr/lib/x86_64-linux-gnu/
-COPY --from=builder /usr/lib/x86_64-linux-gnu/libfftw3.so.3 /usr/lib/x86_64-linux-gnu/
-COPY --from=builder /usr/lib/x86_64-linux-gnu/libGLU.so.* /usr/lib/x86_64-linux-gnu/
-COPY --from=builder /usr/lib/x86_64-linux-gnu/libgl2ps.so.* /usr/lib/x86_64-linux-gnu/
-COPY --from=builder /usr/lib/x86_64-linux-gnu/libcurl.so.4 /usr/lib/x86_64-linux-gnu/
-COPY --from=builder /usr/lib/x86_64-linux-gnu/libcholmod.so.3 /usr/lib/x86_64-linux-gnu/
-COPY --from=builder /usr/lib/x86_64-linux-gnu/libumfpack.so.5 /usr/lib/x86_64-linux-gnu/
-COPY --from=builder /usr/lib/x86_64-linux-gnu/libamd.so.2 /usr/lib/x86_64-linux-gnu/
-COPY --from=builder /usr/lib/x86_64-linux-gnu/libcamd.so.2 /usr/lib/x86_64-linux-gnu/
-COPY --from=builder /usr/lib/x86_64-linux-gnu/libcolamd.so.2 /usr/lib/x86_64-linux-gnu/
-COPY --from=builder /usr/lib/x86_64-linux-gnu/libccolamd.so.2 /usr/lib/x86_64-linux-gnu/
-COPY --from=builder /usr/lib/x86_64-linux-gnu/libcxsparse.so.3 /usr/lib/x86_64-linux-gnu/
-COPY --from=builder /usr/lib/x86_64-linux-gnu/libsuitesparseconfig.so.4 /usr/lib/x86_64-linux-gnu/
-COPY --from=builder /usr/lib/x86_64-linux-gnu/libqrupdate.so.1 /usr/lib/x86_64-linux-gnu/
-COPY --from=builder /usr/lib/x86_64-linux-gnu/libreadline.so /usr/lib/x86_64-linux-gnu/
-COPY --from=builder /lib/x86_64-linux-gnu/libreadline.so.7 /lib/x86_64-linux-gnu/
-COPY --from=builder /usr/lib/x86_64-linux-gnu/libgfortran.so.3 /usr/lib/x86_64-linux-gnu/
-COPY --from=builder /usr/lib/x86_64-linux-gnu/libquadmath.so.0 /usr/lib/x86_64-linux-gnu/
 COPY --from=builder /usr/lib/x86_64-linux-gnu/libnghttp2.so.14 /usr/lib/x86_64-linux-gnu/
 COPY --from=builder /usr/lib/x86_64-linux-gnu/libidn2.so.0 /usr/lib/x86_64-linux-gnu/
 COPY --from=builder /usr/lib/x86_64-linux-gnu/librtmp.so.1 /usr/lib/x86_64-linux-gnu/
@@ -192,9 +207,6 @@ COPY --from=builder /usr/lib/x86_64-linux-gnu/liblcms2.so.2 /usr/lib/x86_64-linu
 COPY --from=builder /usr/lib/libGraphicsMagick++-Q16.so.12 /usr/lib/
 COPY --from=builder /usr/lib/libGraphicsMagick-Q16.so.3 /usr/lib/
 
-# Not linked anywhere (?)
-COPY --from=builder /usr/lib/x86_64-linux-gnu/libqhull.so.* /usr/lib/x86_64-linux-gnu/
-
 
 
 
@@ -206,7 +218,3 @@ RUN octave --version && \
 
 # Set entrypoint (so this image can be used as an executable.)
 ENTRYPOINT ["/usr/local/bin/octave"]
-
-## Separate entrypoint to easily access mkoctfile JIC
-FROM octave as mkoctfile
-ENTRYPOINT ["mkoctfile"]
