@@ -53,12 +53,15 @@ RUN apt-get -qq -y update && \
       librsvg2-bin \
       libosmesa6-dev \
       # GUI
-      libqtcore4 \
-      libqtgui4 \
-      libqt4-network \
-      libqt4-opengl-dev \
+      qttools5-dev \
+      libqt5core5a \
+      libqt5gui5 \
+      libqt5help5 \
+      libqt5network5 \
+      libqt5opengl5-dev \
+      libqt5scintilla2-dev \
       libqscintilla2-dev \
-      libqtwebkit4 \
+      libqt5webkit5-dev \
       libxft-dev \
       # Sundials
       libsundials-serial-dev
@@ -127,11 +130,13 @@ RUN apt-get -qq -y update && \
       libreadline7 \
       # QT
       libqscintilla2-12v5 \
-      libqtcore4 \
-      libqtgui4 \
-      libqt4-help \
-      libqt4-network \
-      libqtwebkit4 \
+      libqt5core5a \
+      libqt5help5 \
+      libqt5gui5 \
+      libqt5sql5-sqlite \
+      libqt5network5 \
+      libqt5webkit5 \
+      libqt5opengl5 \
       # Sundials
       libsundials-serial \
       libklu1 \
@@ -197,8 +202,7 @@ RUN cd /tmp/octave-equivs && \
     equivs-build octave-local && \
     dpkg -i octave-local_*.deb
 
-RUN mkdir -p /.config/octave && \
-    touch /.config/octave/qt-settings
+ADD ./qt-settings /root/.config/octave/qt-settings
 
 RUN apt-get -qq -y remove \
       equivs && \
