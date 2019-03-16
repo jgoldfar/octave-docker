@@ -1,58 +1,14 @@
-FROM debian:stretch-slim as builder
+FROM jgoldfar/octave:base as builder
 
 # Make sure we don't get notifications we can't answer during building.
 ENV DEBIAN_FRONTEND=noninteractive \
-    OctavePath=/opt/octave-${OctaveVersion} \
-    OctaveVersion=4.4.1
+    OctaveVersion=4.4.1 \
+    OctavePath=/opt/octave
 
 LABEL maintainer="Jonathan Goldfarb <jgoldfar@my.fit.edu>"
 
 RUN apt-get -qq -y update && \
-    apt-get -q -y --no-install-recommends install \
-      build-essential \
-      libgfortran-6-dev \
-      curl \
-      libcurl4-openssl-dev \
-      make \
-      ca-certificates \
-      autoconf \
-      automake \
-      # This is necessary for autoreconf
-      libtool-bin \
-      texinfo \
-      gnuplot \ 
-      icoutils \
-      bison \
-      flex \
-      patch \
-      gperf \
-      zip \
-      ghostscript \
-      # hdf5
-      libhdf5-serial-dev \
-      libpcre3-dev \
-      libreadline-dev \
-      libglpk-dev \
-      libqrupdate-dev \
-      libqhull-dev \
-      libfftw3-dev \
-      libgl2ps-dev \
-      libarpack2-dev \
-      libsuitesparse-dev \
-      libopenblas-dev \
-      # Graphics
-      libgs-dev \
-      libgraphicsmagick++ \
-      libgraphicsmagick++1-dev \
-      libfltk1.3-dev \
-      libgl1-mesa-dev \
-      libglu1-mesa-dev \
-      freeglut3-dev \
-      libfreetype6-dev \
-      libfontconfig1-dev \
-      librsvg2-bin \
-      libosmesa6-dev \
-      # GUI
+    apt-get -q -y --no-install-recommends install \     
       qttools5-dev \
       libqt5core5a \
       libqt5gui5 \
@@ -60,26 +16,18 @@ RUN apt-get -qq -y update && \
       libqt5network5 \
       libqt5opengl5-dev \
       libqt5scintilla2-dev \
-      libqscintilla2-dev \
       libqt5webkit5-dev \
       libxft-dev \
       # Sundials
       libsundials-serial-dev
 
-ADD getcwd-path-max.patch /tmp/
-
-RUN mkdir -p ${OctavePath} && \
-    curl -o /tmp/octave-${OctaveVersion}.tar.xz https://ftp.gnu.org/gnu/octave/octave-${OctaveVersion}.tar.xz && \
-    tar xJf /tmp/octave-${OctaveVersion}.tar.xz --directory ${OctavePath} --strip-components 1
-
 #TODO: Re-add make check step
 # ( make check || echo "Tests Failed." )
 
 RUN cd ${OctavePath} && \
-    patch -p2 < /tmp/getcwd-path-max.patch && \
-    autoreconf -i -f && \
     ./configure --disable-docs && \
     make -j3 install
+
 # End builder image
 
 ## 
@@ -124,25 +72,11 @@ RUN apt-get -qq -y update && \
       libfreetype6 \
       libgl2ps1 \
       libgl1-mesa-glx \
+      libgl1-mesa-dri \
       libglu1-mesa \
       libosmesa6 \
       # CLI
       libreadline7 \
-      # QT
-      libqscintilla2-12v5 \
-      libqt5core5a \
-      libqt5help5 \
-      libqt5gui5 \
-      libqt5sql5-sqlite \
-      libqt5network5 \
-      libqt5webkit5 \
-      libqt5opengl5 \
-      # Sundials
-      libsundials-serial \
-      libklu1 \
-      libbtf1 \
-      # For Octave installation
-      equivs \
       # Others
       libgraphicsmagick++-q16-12 \
       libgraphicsmagick-q16-3 \
@@ -159,7 +93,22 @@ RUN apt-get -qq -y update && \
       libsz2 \
       libwebpmux2 \
       libwmf0.2-7 \
-      libaec0
+      libaec0 \
+      # QT
+      libqt5scintilla2-12v5 \
+      libqt5core5a \
+      libqt5help5 \
+      libqt5gui5 \
+      libqt5sql5-sqlite \
+      libqt5network5 \
+      libqt5webkit5 \
+      libqt5opengl5 \
+      # Sundials
+      libsundials-serial \
+      libklu1 \
+      libbtf1 \
+      # For Octave installation
+      equivs
       
 
 # Set ENV the same as above
@@ -213,8 +162,10 @@ RUN apt-get -qq -y remove \
       /var/lib/apt/lists/* \
       /var/log/dpkg.log && \
     octave --version && \
-    octave --eval "disp(eye(2) \ [1, 10]');" && \
-    octave --eval "hf = figure(); x=linspace(0,1,30); plot(x, erf(x)); print(hf, 'plot.eps', '-deps');"
+    octave --eval "disp(eye(2) \ [1, 10]'); exit(0)" && \
+    octave --eval "hf = figure(); x=linspace(0,1,30); plot(x, erf(x)); print(hf, 'plot.eps', '-deps'); exit(0)" && \
+    octave --eval "[t, y] = ode45(@(t,y) zeros(size(y)), [0, 1], 0); exit(0)" && \
+    rm -f plot.eps
     
 
 # Set entrypoint (so this image can be used as an executable.)

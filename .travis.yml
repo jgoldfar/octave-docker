@@ -2,7 +2,9 @@ language: minimal
 
 services:
   - docker
+
 env:
+  - TARGET=base
   - TARGET=latest
   - TARGET=gui
   

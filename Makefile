@@ -1,8 +1,15 @@
 ## Recipes for image build
 DOCKER_USERNAME?=jgoldfar
 DOCKER_REPO_BASE?=octave
-build-builder: Dockerfile.debian
-	docker build -f $< --target=builder -t ${DOCKER_USERNAME}/${DOCKER_REPO_BASE}:builder .
+
+# Base image for subsequent Octave build
+build-base: Dockerfile.base
+	docker build -f $< -t ${DOCKER_USERNAME}/${DOCKER_REPO_BASE}:base .
+
+push-base:
+	docker push ${DOCKER_USERNAME}/${DOCKER_REPO_BASE}:base
+
+base: build-base push-base
 
 # No-GUI build
 build-latest: Dockerfile.debian
