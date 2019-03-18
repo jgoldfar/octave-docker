@@ -29,6 +29,23 @@ push-gui:
 
 gui: build-gui push-gui
 
+PWD:=$(shell pwd)
+run-gui:
+	xhost +local: && \
+	docker run \
+       --rm \
+       --tty \
+       --interactive \
+       --name octave \
+       -e DISPLAY=host.docker.internal:0 \
+       -e QT_GRAPHICSSYSTEM="native" \
+       --workdir=/data \
+       --volume=${PWD}:/data \
+       --entrypoint="" \
+       --privileged \
+       ${DOCKER_USERNAME}/${DOCKER_REPO_BASE}:${IMG_TAG} \
+       octave --gui --traditional
+
 shell:
 	docker run \
 		--rm \
