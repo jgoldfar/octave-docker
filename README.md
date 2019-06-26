@@ -29,6 +29,6 @@ Why should I use this container?
 
 * `latest` contains an Octave installation on top of Debian Stretch, without GUI components
 
-* `gui` is the same as above, including GUI components. Run `./run-gui.sh` to start the Octave GUI.
+* `gui` is the same as above, including GUI components. Run `make run-gui` to start the Octave GUI.
 
 * `base` is a base image for Octave software compilation.
