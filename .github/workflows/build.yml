@@ -26,12 +26,14 @@ jobs:
         uses: actions/checkout@v2
 
       - name: Login to Docker
-        run: docker login -u $DOCKER_USER -p $DOCKER_TOKEN
+        run: echo $DOCKER_TOKEN | docker login -u $DOCKER_USER --password-stdin
 
       - name: Build image for ${{matrix.image_version}}
         id: build_image
         run: |
           docker build -q -f Dockerfile.${{matrix.image_version}} -t $REPO_NAME:${{matrix.image_version}}-$GITHUB_SHA .
+        env:
+          DOCKER_BUILDKIT: 1
 
       - name: Tag image with git SHA and latest
         run: |

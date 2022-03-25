@@ -55,7 +55,7 @@ RUN apt-get -qq -y update && \
     xz-utils \
     libsundials-dev \
     curl \
-    libcurl4-openssl-dev \
+    libcurl4-gnutls-dev \
     ca-certificates \
     texinfo \
     patch \
@@ -95,69 +95,69 @@ RUN cd ${OctavePath} && \
 FROM debian:bullseye-slim as latest
 RUN apt-get -qq -y update && \
     apt-get -qq -y --no-install-recommends install \
-      texinfo \
-      ghostscript \
-      gnuplot \
-      # Build-essential related
-      libgomp1 \
-      libcurl4-openssl-dev \
-      libgfortran-6-dev \
-      libhdf5-serial-dev \
-      libquadmath0 \
-      libqhull7 \
-      # Linear Algebra
-      libsuitesparseconfig5 \
-      # AMD
-      libamd2 \
-      libcamd2 \
-      libcolamd2 \
-      libccolamd2 \
-      # Other LA
-      libumfpack5 \
-      libqrupdate1 \
-      libcholmod3 \
-      libarpack2 \
-      libopenblas-base \
-      libcxsparse3 \
-      # FFTW
-      libfftw3-double3 \
-      libfftw3-single3 \
-      # Graphical Output
-      libfltk-gl1.3 \
-      libfltk1.3 \
-      libfontconfig1 \
-      libfreetype6 \
-      libgl2ps1 \
-      libgl1-mesa-glx \
-      libglu1-mesa \
-      libosmesa6 \
-      # CLI
-      libreadline7 \
-      # Others
-      libgraphicsmagick++-q16-12 \
-      libgraphicsmagick-q16-3 \
-      liblcms2-2 \
-      libnghttp2-14 \
-      libidn2-0 \
-      librtmp1 \
-      libssh2-1 \
-      libpsl5 \
-      libmetis5 \
-      libunistring0 \
-      libsasl2-2 \
-      libldap-2.4-2 \
-      libsz2 \
-      libwebpmux2 \
-      libwmf0.2-7 \
-      libaec0 \
-      # Sundials
+    texinfo \
+    ghostscript \
+    gnuplot \
+    # Build-essential related
+    libgomp1 \
+    libcurl4-gnutls-dev \
+    libgfortran-10-dev \
+    libhdf5-serial-dev \
+    libquadmath0 \
+    libqhull8.0 \
+    # Linear Algebra
+    libsuitesparseconfig5 \
+    # AMD
+    libamd2 \
+    libcamd2 \
+    libcolamd2 \
+    libccolamd2 \
+    # Other LA
+    libumfpack5 \
+    libqrupdate1 \
+    libcholmod3 \
+    libarpack2 \
+    libopenblas-base \
+    libcxsparse3 \
+    # FFTW
+    libfftw3-double3 \
+    libfftw3-single3 \
+    # Graphical Output
+    libfltk-gl1.3 \
+    libfltk1.3 \
+    libfontconfig1 \
+    libfreetype6 \
+    libgl2ps1.4 \
+    libgl1-mesa-glx \
+    libglu1-mesa \
+    libosmesa6 \
+    # CLI
+    libreadline8 \
+    # Others
+    libgraphicsmagick++-q16-12 \
+    libgraphicsmagick-q16-3 \
+    liblcms2-2 \
+    libnghttp2-14 \
+    libidn2-0 \
+    librtmp1 \
+    libssh2-1 \
+    libpsl5 \
+    libmetis5 \
+    libunistring2 \
+    libsasl2-2 \
+    libldap-2.4-2 \
+    libsz2 \
+    libwebpmux3 \
+    libwmf0.2-7 \
+    libaec0 \
+    # Sundials
     libsundials-cvode4 \
     libsundials-ida4 \
     libsundials-arkode3 \
-      libklu1 \
-      libbtf1 \
-      # For Octave installation
-      equivs
+    libklu1 \
+    libbtf1 \
+    # For Octave installation
+    equivs
 
 
 # Set ENV the same as above
