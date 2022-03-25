@@ -1,4 +1,4 @@
-FROM debian:stretch-slim as builder
+FROM debian:bullseye-slim as builder
 
 LABEL maintainer="Jonathan Goldfarb <jgoldfar@gmail.com>"
 
@@ -56,10 +56,6 @@ RUN apt-get -qq -y update && \
     perl \
     rsync \
     tar \
-    qtbase5-dev \
-    qttools5-dev \
-    qttools5-dev-tools \
-    libqscintilla2-qt5-dev \
     libsundials-dev \
     curl \
     libcurl4-openssl-dev \
@@ -75,7 +71,7 @@ RUN apt-get -qq -y update && \
     libglu1-mesa-dev \
     freeglut3-dev \
     libosmesa6-dev \
-    libsundials-serial-dev
+    libsundials-dev
 
 ADD getcwd-path-max.patch /tmp/
 
@@ -99,7 +95,7 @@ RUN cd ${OctavePath} && \
 ##
 ##
 
-FROM debian:stretch-slim as latest
+FROM debian:bullseye-slim as latest
 RUN apt-get -qq -y update && \
     apt-get -qq -y --no-install-recommends install \
       texinfo \
@@ -113,7 +109,7 @@ RUN apt-get -qq -y update && \
       libquadmath0 \
       libqhull7 \
       # Linear Algebra
-      libsuitesparseconfig4 \
+      libsuitesparseconfig5 \
       # AMD
       libamd2 \
       libcamd2 \
@@ -158,7 +154,9 @@ RUN apt-get -qq -y update && \
       libwmf0.2-7 \
       libaec0 \
       # Sundials
-      libsundials-serial \
+    libsundials-cvode4 \
+    libsundials-ida4 \
+    libsundials-arkode3 \
       libklu1 \
       libbtf1 \
       # For Octave installation
