@@ -7,8 +7,8 @@ ENV DEBIAN_FRONTEND=noninteractive \
     OctaveVersion=6.4.0 \
     OctavePath=/opt/octave
 
-RUN apt-get -qq -y update && \
-    apt-get -qq -y --no-install-recommends install \
+RUN apt -qq -y update && \
+    apt -qq -y --no-install-recommends install \
     gcc \
     g++ \
     gfortran \
@@ -28,12 +28,10 @@ RUN apt-get -qq -y update && \
     libglpk-dev \
     libreadline-dev \
     gnuplot-x11 \
-    libgraphicsmagick++1-dev \
     # hdf5
     libhdf5-dev \
     openjdk-11-jdk \
     libsndfile1-dev \
-    llvm-dev \
     libgl1-mesa-dev \
     pstoedit \
     portaudio19-dev \
