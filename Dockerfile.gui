@@ -1,25 +1,99 @@
-FROM jgoldfar/octave:base as builder
+FROM debian:stretch-slim as builder
+
+LABEL maintainer="Jonathan Goldfarb <jgoldfar@gmail.com>"
 
 # Make sure we don't get notifications we can't answer during building.
 ENV DEBIAN_FRONTEND=noninteractive \
-    OctaveVersion=4.4.1 \
+    OctaveVersion=6.4.0 \
     OctavePath=/opt/octave
 
-LABEL maintainer="Jonathan Goldfarb <jgoldfar@my.fit.edu>"
-
 RUN apt-get -qq -y update && \
-    apt-get -q -y --no-install-recommends install \     
-      qttools5-dev \
-      libqt5core5a \
-      libqt5gui5 \
-      libqt5help5 \
-      libqt5network5 \
-      libqt5opengl5-dev \
-      libqt5scintilla2-dev \
-      libqt5webkit5-dev \
-      libxft-dev \
-      # Sundials
-      libsundials-serial-dev
+    apt-get -qq -y --no-install-recommends install \
+    gcc \
+    g++ \
+    gfortran \
+    make \
+    libblas-dev \
+    liblapack-dev \
+    libpcre3-dev \
+    libarpack2-dev \
+    libcurl4-gnutls-dev \
+    epstool \
+    libfftw3-dev \
+    fig2dev \
+    libfltk1.3-dev \
+    libfontconfig1-dev \
+    libfreetype6-dev \
+    libgl2ps-dev \
+    libglpk-dev \
+    libreadline-dev \
+    gnuplot-x11 \
+    libgraphicsmagick++1-dev \
+    # hdf5
+    libhdf5-dev \
+    openjdk-11-jdk \
+    libsndfile1-dev \
+    llvm-dev \
+    libgl1-mesa-dev \
+    pstoedit \
+    portaudio19-dev \
+    libqhull-dev \
+    libqrupdate-dev \
+    libsuitesparse-dev \
+    texlive-latex-extra \
+    libxft-dev \
+    zlib1g-dev \
+    autoconf \
+    automake \
+    bison \
+    flex \
+    gperf \
+    gzip \
+    icoutils \
+    librsvg2-bin \
+    # This is necessary for autoreconf
+    libtool \
+    perl \
+    rsync \
+    tar \
+    qtbase5-dev \
+    qttools5-dev \
+    qttools5-dev-tools \
+    libqt5core5a \
+    libqt5gui5 \
+    libqt5help5 \
+    libqt5network5 \
+    libqt5opengl5-dev \
+    libqt5scintilla2-dev \
+    libqt5webkit5-dev \
+    libxft-dev \
+    libqscintilla2-qt5-dev \
+    libsundials-dev \
+    curl \
+    libcurl4-openssl-dev \
+    ca-certificates \
+    texinfo \
+    patch \
+    ghostscript \
+    libopenblas-dev \
+    # Graphics
+    libgs-dev \
+    libgraphicsmagick++ \
+    libgraphicsmagick++1-dev \
+    libglu1-mesa-dev \
+    freeglut3-dev \
+    libosmesa6-dev \
+    # Sundials
+    libsundials-serial-dev
+
+ADD getcwd-path-max.patch /tmp/
+
+RUN mkdir -p ${OctavePath} && \
+    curl -o /tmp/octave-${OctaveVersion}.tar.xz -L http://mirrors.kernel.org/gnu/octave/octave-${OctaveVersion}.tar.xz && \
+    tar xJf /tmp/octave-${OctaveVersion}.tar.xz --directory ${OctavePath} --strip-components 1 && \
+    cd ${OctavePath} && \
+    patch -p2 < /tmp/getcwd-path-max.patch && \
+    autoreconf -i -f
 
 #TODO: Re-add make check step
 # ( make check || echo "Tests Failed." )
@@ -30,7 +104,7 @@ RUN cd ${OctavePath} && \
 
 # End builder image
 
-## 
+##
 ##
 ##
 
@@ -109,10 +183,10 @@ RUN apt-get -qq -y update && \
       libbtf1 \
       # For Octave installation
       equivs
-      
+
 
 # Set ENV the same as above
-ENV OctaveVersion=4.4.1 \
+ENV OctaveVersion=6.4.0 \
     DISPLAY=:0
 
 # Copy over libs and share files
@@ -123,7 +197,7 @@ COPY --from=builder /usr/local/share/octave /usr/local/share/octave
 COPY --from=builder /usr/local/bin/*oct* /usr/local/bin/
 COPY --from=builder /usr/local/libexec/octave /usr/local/libexec/octave
 
-# Copy over Octave docstrings. Note that some paths contain 
+# Copy over Octave docstrings. Note that some paths contain
 # version-specific information.
 COPY --from=builder /usr/local/share/octave/${OctaveVersion}/etc/built-in-docstrings /usr/local/share/octave/${OctaveVersion}/etc/
 
@@ -161,12 +235,8 @@ RUN apt-get -qq -y remove \
     rm -rf \
       /var/lib/apt/lists/* \
       /var/log/dpkg.log && \
-    octave --version && \
-    octave --eval "disp(eye(2) \ [1, 10]'); exit(0)" && \
-    octave --eval "hf = figure(); x=linspace(0,1,30); plot(x, erf(x)); print(hf, 'plot.eps', '-deps'); exit(0)" && \
-    octave --eval "[t, y] = ode45(@(t,y) zeros(size(y)), [0, 1], 0); exit(0)" && \
-    rm -f plot.eps
-    
+    octave --version
+
 
 # Set entrypoint (so this image can be used as an executable.)
 ENTRYPOINT ["/usr/local/bin/octave"]
