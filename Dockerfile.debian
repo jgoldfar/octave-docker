@@ -52,6 +52,7 @@ RUN apt-get -qq -y update && \
     perl \
     rsync \
     tar \
+    xz-utils \
     libsundials-dev \
     curl \
     libcurl4-openssl-dev \
