@@ -28,7 +28,7 @@ RUN apt-get -qq -y update && \
     libreadline-dev \
     gnuplot-x11 \
     # hdf5
-    libhdf5-dev \
+    libhdf5-openmpi-dev \
     openjdk-11-jdk \
     libsndfile1-dev \
     libgl1-mesa-dev \
@@ -102,7 +102,7 @@ RUN apt-get -qq -y update && \
     libgomp1 \
     libcurl4-gnutls-dev \
     libgfortran-10-dev \
-    libhdf5-dev \
+    libhdf5-openmpi-dev \
     libquadmath0 \
     libqhull8.0 \
     # Linear Algebra
