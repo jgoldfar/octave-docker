@@ -102,7 +102,7 @@ RUN apt-get -qq -y update && \
     libgomp1 \
     libcurl4-gnutls-dev \
     libgfortran-10-dev \
-    libhdf5-serial-dev \
+    libhdf5-dev \
     libquadmath0 \
     libqhull8.0 \
     # Linear Algebra
