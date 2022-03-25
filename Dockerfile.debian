@@ -98,6 +98,7 @@ RUN apt-get -qq -y update && \
     texinfo \
     ghostscript \
     gnuplot \
+    epstool \
     # Build-essential related
     libgomp1 \
     libcurl4-gnutls-dev \
