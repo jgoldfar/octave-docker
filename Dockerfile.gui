@@ -9,7 +9,7 @@ ENV DEBIAN_FRONTEND=noninteractive \
     OctavePath=/opt/octave
 
 RUN apt-get -qq -y update && \
-    apt-get -qq -y --no-install-recommends install \
+    apt-get -q -y --no-install-recommends install \
     gcc \
     g++ \
     gfortran \
@@ -29,12 +29,10 @@ RUN apt-get -qq -y update && \
     libglpk-dev \
     libreadline-dev \
     gnuplot-x11 \
-    libgraphicsmagick++1-dev \
     # hdf5
-    libhdf5-dev \
+    libhdf5-openmpi-dev \
     openjdk-11-jdk \
     libsndfile1-dev \
-    llvm-dev \
     libgl1-mesa-dev \
     pstoedit \
     portaudio19-dev \
@@ -57,6 +55,7 @@ RUN apt-get -qq -y update && \
     perl \
     rsync \
     tar \
+    xz-utils \
     qtbase5-dev \
     qttools5-dev \
     qttools5-dev-tools \
@@ -70,7 +69,6 @@ RUN apt-get -qq -y update && \
     libqscintilla2-qt5-dev \
     libsundials-dev \
     curl \
-    libcurl4-openssl-dev \
     ca-certificates \
     texinfo \
     patch \
@@ -109,80 +107,81 @@ RUN cd ${OctavePath} && \
 FROM debian:bullseye-slim as gui
 RUN apt-get -qq -y update && \
     apt-get -qq -y --no-install-recommends install \
-      texinfo \
-      ghostscript \
-      gnuplot \
-      curl \
-      # Build-essential related
-      libgomp1 \
-      libcurl4-openssl-dev \
-      libgfortran-6-dev \
-      libhdf5-serial-dev \
-      libquadmath0 \
-      libqhull7 \
-      # Linear Algebra
-      libsuitesparseconfig5 \
-      # AMD
-      libamd2 \
-      libcamd2 \
-      libcolamd2 \
-      libccolamd2 \
-      # Other LA
-      libumfpack5 \
-      libqrupdate1 \
-      libcholmod3 \
-      libarpack2 \
-      libopenblas-base \
-      libcxsparse3 \
-      # FFTW
-      libfftw3-double3 \
-      libfftw3-single3 \
-      # Graphical Output
-      libfltk-gl1.3 \
-      libfltk1.3 \
-      libfontconfig1 \
-      libfreetype6 \
-      libgl2ps1 \
-      libgl1-mesa-glx \
-      libgl1-mesa-dri \
-      libglu1-mesa \
-      libosmesa6 \
-      # CLI
-      libreadline7 \
-      # Others
-      libgraphicsmagick++-q16-12 \
-      libgraphicsmagick-q16-3 \
-      liblcms2-2 \
-      libnghttp2-14 \
-      libidn2-0 \
-      librtmp1 \
-      libssh2-1 \
-      libpsl5 \
-      libmetis5 \
-      libunistring0 \
-      libsasl2-2 \
-      libldap-2.4-2 \
-      libsz2 \
-      libwebpmux2 \
-      libwmf0.2-7 \
-      libaec0 \
+    texinfo \
+    ghostscript \
+    gnuplot \
+    epstool \
+    curl \
+    # Build-essential related
+    libgomp1 \
+    libcurl4-gnutls-dev \
+    libgfortran-10-dev \
+    libhdf5-openmpi-dev \
+    libquadmath0 \
+    libqhull8.0 \
+    # Linear Algebra
+    libsuitesparseconfig5 \
+    # AMD
+    libamd2 \
+    libcamd2 \
+    libcolamd2 \
+    libccolamd2 \
+    # Other LA
+    libumfpack5 \
+    libqrupdate1 \
+    libcholmod3 \
+    libarpack2 \
+    libopenblas-base \
+    libcxsparse3 \
+    # FFTW
+    libfftw3-double3 \
+    libfftw3-single3 \
+    # Graphical Output
+    libfltk-gl1.3 \
+    libfltk1.3 \
+    libfontconfig1 \
+    libfreetype6 \
+    libgl2ps1.4 \
+    libgl1-mesa-glx \
+    libgl1-mesa-dri \
+    libglu1-mesa \
+    libosmesa6 \
+    # CLI
+    libreadline8 \
+    # Others
+    libgraphicsmagick++-q16-12 \
+    libgraphicsmagick-q16-3 \
+    liblcms2-2 \
+    libnghttp2-14 \
+    libidn2-0 \
+    librtmp1 \
+    libssh2-1 \
+    libpsl5 \
+    libmetis5 \
+    libunistring2 \
+    libsasl2-2 \
+    libldap-2.4-2 \
+    libsz2 \
+    libwebpmux3 \
+    libwmf0.2-7 \
+    libaec0 \
     # QT
     libqscintilla2-qt5-15 \
-      libqt5core5a \
-      libqt5help5 \
-      libqt5gui5 \
-      libqt5sql5-sqlite \
-      libqt5network5 \
-      libqt5webkit5 \
-      libqt5opengl5 \
+    libqt5core5a \
+    libqt5help5 \
+    libqt5gui5 \
+    libqt5sql5-sqlite \
+    libqt5network5 \
+    libqt5webkit5 \
+    libqt5opengl5 \
     # Sundials
     libsundials-cvode4 \
     libsundials-ida4 \
     libsundials-arkode3 \
-      libklu1 \
-      libbtf1 \
-      # For Octave installation
-      equivs
+    libklu1 \
+    libbtf1 \
+    # For Octave installation
+    equivs
 
 
 # Set ENV the same as above
@@ -227,6 +226,7 @@ RUN cd /tmp/octave-equivs && \
 
 ADD ./qt-settings /root/.config/octave/qt-settings
 
+# Smoke tests for built Octave
 RUN apt-get -qq -y remove \
       equivs && \
     apt-get -qq -y autoremove && \
@@ -235,7 +235,9 @@ RUN apt-get -qq -y remove \
     rm -rf \
       /var/lib/apt/lists/* \
       /var/log/dpkg.log && \
-    octave --version
+    octave --version && \
+    octave --no-gui --eval "disp(eye(2) \ [1, 10]');" && \
+    octave --no-gui --eval "hf = figure(); x=linspace(0,1,30); plot(x, erf(x)); print(hf, 'plot.eps', '-deps');"
 
 
 # Set entrypoint (so this image can be used as an executable.)

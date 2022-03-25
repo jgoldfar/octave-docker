@@ -53,7 +53,6 @@ RUN apt-get -qq -y update && \
     rsync \
     tar \
     xz-utils \
-    libsundials-dev \
     curl \
     libcurl4-gnutls-dev \
     ca-certificates \
@@ -170,6 +169,7 @@ COPY --from=builder /usr/local/share/octave /usr/local/share/octave
 
 # Copy over Octave binaries (includes mkoctfile)
 COPY --from=builder /usr/local/bin/*oct* /usr/local/bin/
+COPY --from=builder /usr/local/libexec/octave /usr/local/libexec/octave
 
 # Copy over Octave docstrings. Note that some paths contain
 # version-specific information.
@@ -199,6 +199,7 @@ RUN cd /tmp/octave-equivs && \
     equivs-build octave-local && \
     dpkg -i octave-local_*.deb
 
+# Smoke tests for built Octave
 RUN apt-get -qq -y remove \
       equivs && \
     apt-get -qq -y autoremove && \
