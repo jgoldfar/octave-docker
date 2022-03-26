@@ -1,6 +1,7 @@
 # Octave docker container
 
 [![Docker Build Status](https://img.shields.io/docker/automated/jgoldfar/octave.svg) ![Docker Pulls](https://img.shields.io/docker/pulls/jgoldfar/octave.svg)](https://hub.docker.com/r/jgoldfar/octave/)
+[![Build and push docker images](https://github.com/jgoldfar/octave-docker/actions/workflows/build.yml/badge.svg)](https://github.com/jgoldfar/octave-docker/actions/workflows/build.yml)
 
 This repository builds containers for [Octave](https://octave.org/), primarily for the purposes of running continuous integration processes against MATLAB code.
 
