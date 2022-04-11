@@ -40,7 +40,7 @@ jobs:
           docker tag $REPO_NAME:${{matrix.image_version}}-$GITHUB_SHA $DOCKER_USER/$REPO_NAME:${{matrix.image_version}}-$GITHUB_SHA
 
       - name: Push tagged images to docker
-        if: ${{ (github.event_name == 'push' || github.event_name == 'pull_request') && github.ref_protected }}
+        if: ${{ (github.event_name == 'push' || github.event_name == 'pull_request' || github.event_name == 'schedule') && github.ref_protected }}
         run: |
           docker push $DOCKER_USER/$REPO_NAME:${{matrix.image_version}}-$GITHUB_SHA
           docker push $DOCKER_USER/$REPO_NAME:${{matrix.image_version}}-latest
