@@ -104,7 +104,7 @@ RUN cd ${OctavePath} && \
 ##
 ##
 
-FROM debian:bullseye-slim as gui
+FROM debian:12.1-slim as gui
 RUN apt-get -qq -y update && \
     apt-get -qq -y --no-install-recommends install \
     texinfo \
