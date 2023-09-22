@@ -1,5 +1,5 @@
-# https://www.debian.org/releases/stable/ -> current LTS is v11 Bullseye
-FROM debian:bullseye-slim as builder
+# https://www.debian.org/releases/stable/ -> current LTS is Bookworm
+FROM debian:12.1-slim as builder
 
 LABEL maintainer="Jonathan Goldfarb <jgoldfar@gmail.com>"
 

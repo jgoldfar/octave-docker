@@ -5,6 +5,8 @@
 
 This repository builds containers for [Octave](https://octave.org/), primarily for the purposes of running continuous integration processes against MATLAB code.
 
+PRs welcome; this repository is otherwise minimally maintained.
+
 ## Setup
 
 build:
