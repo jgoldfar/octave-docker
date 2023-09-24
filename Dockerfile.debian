@@ -30,7 +30,7 @@ RUN apt-get -qq -y update && \
     gnuplot-x11 \
     # hdf5
     libhdf5-openmpi-dev \
-    openjdk-11-jdk \
+    openjdk-17-jdk \
     libsndfile1-dev \
     libgl1-mesa-dev \
     pstoedit \
