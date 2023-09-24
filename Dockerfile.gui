@@ -16,6 +16,7 @@ RUN apt-get -qq -y update && \
     g++ \
     gfortran \
     make \
+    rapidjson-dev \
     libblas-dev \
     liblapack-dev \
     libpcre3-dev \
@@ -31,6 +32,7 @@ RUN apt-get -qq -y update && \
     libglpk-dev \
     libreadline-dev \
     gnuplot-x11 \
+    libspqr2 \
     # hdf5
     libhdf5-openmpi-dev \
     openjdk-17-jdk \
@@ -168,6 +170,7 @@ RUN apt-get -qq -y update && \
     libwebpmux3 \
     libwmf0.2-7 \
     libaec0 \
+    libspqr2 \
     # QT
     libqscintilla2-qt5-15 \
     libqt5core5a \
