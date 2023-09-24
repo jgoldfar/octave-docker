@@ -29,6 +29,8 @@ RUN apt-get -qq -y update && \
     libgl2ps-dev \
     libglpk-dev \
     libreadline-dev \
+    libspqr2 \
+    rapidjson-dev \
     gnuplot-x11 \
     # hdf5
     libhdf5-openmpi-dev \
@@ -154,6 +156,7 @@ RUN apt-get -qq -y update && \
     libwebpmux3 \
     libwmf0.2-7 \
     libaec0 \
+    libspqr2 \
     # Sundials
     libsundials-cvode6 \
     libsundials-ida6 \
