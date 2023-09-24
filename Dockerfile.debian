@@ -7,8 +7,8 @@ ENV DEBIAN_FRONTEND=noninteractive \
     OctaveVersion=6.4.0 \
     OctavePath=/opt/octave
 
-RUN apt-get -qq -y update && \
-    apt-get -q -y --no-install-recommends install \
+RUN apt-get -qq -y update
+RUN apt-get -q -y --no-install-recommends install \
     gcc \
     g++ \
     gfortran \
@@ -91,7 +91,7 @@ RUN cd ${OctavePath} && \
 ##
 ##
 
-FROM debian:bullseye-slim as latest
+FROM debian:12.1-slim as latest
 RUN apt-get -qq -y update && \
     apt-get -qq -y --no-install-recommends install \
     texinfo \

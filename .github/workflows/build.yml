@@ -31,7 +31,7 @@ jobs:
       - name: Build image for ${{matrix.image_version}}
         id: build_image
         run: |
-          docker build -q -f Dockerfile.${{matrix.image_version}} -t ${DOCKER_USER}/$REPO_NAME:${{matrix.image_version}}-$GITHUB_SHA .
+          docker build -f Dockerfile.${{matrix.image_version}} -t ${DOCKER_USER}/$REPO_NAME:${{matrix.image_version}}-$GITHUB_SHA .
         env:
           DOCKER_BUILDKIT: 1
 
