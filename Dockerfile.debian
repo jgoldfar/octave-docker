@@ -1,9 +1,11 @@
 ARG DEBIAN_VERSION=12.1
+ARG OCTAVE_VERSION=8.3.0
+
 FROM debian:${DEBIAN_VERSION}-slim as builder
+ARG OCTAVE_VERSION
 
 LABEL maintainer="Jonathan Goldfarb <jgoldfar@gmail.com>"
 
-ARG OCTAVE_VERSION=8.3.0
 # Make sure we don't get notifications we can't answer during building.
 ENV DEBIAN_FRONTEND=noninteractive \
     OctavePath=/opt/octave
@@ -93,6 +95,7 @@ RUN cd ${OctavePath} && \
 ##
 # https://packages.debian.org/search?suite=bookworm&section=all&arch=any&searchon=names&keywords=libgfortran
 FROM debian:${DEBIAN_VERSION}-slim as latest
+ARG OCTAVE_VERSION
 RUN apt-get -qq -y update && \
     apt-get -qq -y --no-install-recommends install \
     texinfo \
@@ -160,9 +163,6 @@ RUN apt-get -qq -y update && \
     # For Octave installation
     equivs
 
-
-# Set ENV the same as above
-ENV OCTAVE_VERSION=6.4.0
 
 # Copy over libs and share files
 COPY --from=builder /usr/local/lib/octave /usr/local/lib/octave
