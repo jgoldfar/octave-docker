@@ -34,8 +34,8 @@ jobs:
         id: build_image
         run: |
           docker build \
-          --build-arg "OCTAVE_VERSION=${OCTAVE_VERSION} \
-          --build-arg "DEBIAN_VERSION=${DEBIAN_VERSION} \
+          --build-arg "OCTAVE_VERSION=${OCTAVE_VERSION}" \
+          --build-arg "DEBIAN_VERSION=${DEBIAN_VERSION}" \
           -f Dockerfile.${{matrix.image_version}} \
           -t ${DOCKER_USER}/$REPO_NAME:${{matrix.image_version}}-${OCTAVE_VERSION}-$GITHUB_SHA \
           .
