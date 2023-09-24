@@ -1,15 +1,16 @@
-# https://www.debian.org/releases/stable/ -> current LTS is Bookworm
-FROM debian:12.1-slim as builder
+# https://www.debian.org/releases/stable/ -> current LTS is Bookworm, 12.1
+ARG DEBIAN_VERSION=12.1
+FROM debian:${DEBIAN_VERSION}-slim as builder
 
 LABEL maintainer="Jonathan Goldfarb <jgoldfar@gmail.com>"
 
+ARG OCTAVE_VERSION=6.4.0
 # Make sure we don't get notifications we can't answer during building.
 ENV DEBIAN_FRONTEND=noninteractive \
-    OctaveVersion=6.4.0 \
     OctavePath=/opt/octave
 
-RUN apt-get -qq -y update
-RUN apt-get -q -y --no-install-recommends install \
+RUN apt-get -qq -y update && \
+    apt-get -q -y --no-install-recommends install \
     gcc \
     g++ \
     gfortran \
@@ -85,8 +86,8 @@ RUN apt-get -q -y --no-install-recommends install \
 ADD getcwd-path-max.patch /tmp/
 
 RUN mkdir -p ${OctavePath} && \
-    curl -o /tmp/octave-${OctaveVersion}.tar.xz -L http://mirrors.kernel.org/gnu/octave/octave-${OctaveVersion}.tar.xz && \
-    tar xJf /tmp/octave-${OctaveVersion}.tar.xz --directory ${OctavePath} --strip-components 1 && \
+    curl -o /tmp/octave-${OCTAVE_VERSION}.tar.xz -L http://mirrors.kernel.org/gnu/octave/octave-${OCTAVE_VERSION}.tar.xz && \
+    tar xJf /tmp/octave-${OCTAVE_VERSION}.tar.xz --directory ${OctavePath} --strip-components 1 && \
     cd ${OctavePath} && \
     patch -p2 < /tmp/getcwd-path-max.patch && \
     autoreconf -i -f
@@ -104,7 +105,7 @@ RUN cd ${OctavePath} && \
 ##
 ##
 
-FROM debian:12.1-slim as gui
+FROM debian:${DEBIAN_VERSION}-slim as gui
 RUN apt-get -qq -y update && \
     apt-get -qq -y --no-install-recommends install \
     texinfo \
@@ -131,7 +132,7 @@ RUN apt-get -qq -y update && \
     libqrupdate1 \
     libcholmod3 \
     libarpack2 \
-    libopenblas-base \
+    libopenblas0 \
     libcxsparse3 \
     # FFTW
     libfftw3-double3 \
@@ -185,7 +186,7 @@ RUN apt-get -qq -y update && \
 
 
 # Set ENV the same as above
-ENV OctaveVersion=6.4.0 \
+ENV OCTAVE_VERSION=6.4.0 \
     DISPLAY=:0
 
 # Copy over libs and share files
@@ -198,16 +199,16 @@ COPY --from=builder /usr/local/libexec/octave /usr/local/libexec/octave
 
 # Copy over Octave docstrings. Note that some paths contain
 # version-specific information.
-COPY --from=builder /usr/local/share/octave/${OctaveVersion}/etc/built-in-docstrings /usr/local/share/octave/${OctaveVersion}/etc/
+COPY --from=builder /usr/local/share/octave/${OCTAVE_VERSION}/etc/built-in-docstrings /usr/local/share/octave/${OCTAVE_VERSION}/etc/
 
 # Copy over Octave include files
-COPY --from=builder /usr/local/include/octave-${OctaveVersion} /usr/local/include/octave-${OctaveVersion}
+COPY --from=builder /usr/local/include/octave-${OCTAVE_VERSION} /usr/local/include/octave-${OCTAVE_VERSION}
 
 # Copy over necessary fonts
-COPY --from=builder /usr/local/share/octave/${OctaveVersion}/fonts/* /usr/local/share/octave/${OctaveVersion}/fonts/
+COPY --from=builder /usr/local/share/octave/${OCTAVE_VERSION}/fonts/* /usr/local/share/octave/${OCTAVE_VERSION}/fonts/
 
 # Copy over Octave STDLIB (m-files)
-COPY --from=builder /usr/local/share/octave/${OctaveVersion}/m /usr/local/share/octave/${OctaveVersion}/m
+COPY --from=builder /usr/local/share/octave/${OCTAVE_VERSION}/m /usr/local/share/octave/${OCTAVE_VERSION}/m
 
 # Copy over Octave site packages
 COPY --from=builder /usr/local/share/octave/site/* /usr/local/share/octave/site/
@@ -219,7 +220,7 @@ COPY octave-local.tpl /tmp/octave-equivs/octave-local.tpl
 
 RUN cd /tmp/octave-equivs && \
     equivs-control octave-local && \
-    sed 's/__VER__/${OctaveVersion}/' octave-local.tpl > octave-local && \
+    sed 's/__VER__/${OCTAVE_VERSION}/' octave-local.tpl > octave-local && \
     cat octave-local && \
     equivs-build octave-local && \
     dpkg -i octave-local_*.deb
