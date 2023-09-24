@@ -90,7 +90,7 @@ RUN cd ${OctavePath} && \
 ##
 ##
 ##
-
+# https://packages.debian.org/search?suite=bookworm&section=all&arch=any&searchon=names&keywords=libgfortran
 FROM debian:12.1-slim as latest
 RUN apt-get -qq -y update && \
     apt-get -qq -y --no-install-recommends install \
@@ -101,7 +101,7 @@ RUN apt-get -qq -y update && \
     # Build-essential related
     libgomp1 \
     libcurl4-gnutls-dev \
-    libgfortran-10-dev \
+    libgfortran-12-dev \
     libhdf5-openmpi-dev \
     libquadmath0 \
     libqhull8.0 \
@@ -145,15 +145,15 @@ RUN apt-get -qq -y update && \
     libmetis5 \
     libunistring2 \
     libsasl2-2 \
-    libldap-2.4-2 \
+    libldap-dev \
     libsz2 \
     libwebpmux3 \
     libwmf0.2-7 \
     libaec0 \
     # Sundials
-    libsundials-cvode4 \
-    libsundials-ida4 \
-    libsundials-arkode3 \
+    libsundials-cvode6 \
+    libsundials-ida6 \
+    libsundials-arkode5 \
     libklu1 \
     libbtf1 \
     # For Octave installation
