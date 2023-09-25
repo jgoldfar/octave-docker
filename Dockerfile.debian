@@ -157,6 +157,7 @@ RUN apt-get -qq -y update && \
     libwmf0.2-7 \
     libaec0 \
     libspqr2 \
+    libpcre3 \
     # Sundials
     libsundials-cvode6 \
     libsundials-ida6 \

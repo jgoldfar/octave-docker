@@ -12,7 +12,7 @@ env:
   DOCKER_USER: ${{secrets.DOCKER_USER}}
   DOCKER_TOKEN: ${{secrets.DOCKER_TOKEN}}
   REPO_NAME: ${{secrets.REPO_NAME}}
-  OCTAVE_VERSION: 6.4.0
+  OCTAVE_VERSION: 8.3.0
   DEBIAN_VERSION: 12.1
 
 jobs:
